@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import sharp from 'sharp';
-import potrace from 'potrace';
+import axios from 'axios';
 
 const ImageUploader = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -9,22 +8,19 @@ const ImageUploader = () => {
     const file = event.target.files[0];
     setSelectedImage(URL.createObjectURL(file));
 
-    // Convert image to webp format
-    const convertedImageBuffer = await sharp(file)
-      .webp()
-      .toBuffer();
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      const imageData = reader.result.replace('data:image/jpeg;base64,', '');
 
-    // Upscale image
-    const upscaledImageBuffer = await sharp(convertedImageBuffer)
-      .resize(2 * width, 2 * height) // Example: upscale by doubling the width and height
-      .toBuffer();
-
-    // Convert image to vector format
-    const trace = potrace.imagedata(upscaledImageBuffer);
-    trace.process();
-    const svgData = trace.getSVG();
-
-    // Do something with the upscaled image buffer and SVG data
+      try {
+        const response = await axios.post('/api/upload', { image: imageData });
+        // Handle the response and do something with the SVG data
+        console.log(response.data.svgData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
   };
 
   return (
