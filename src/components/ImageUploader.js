@@ -1,12 +1,19 @@
 import { useState } from 'react';
+import sharp from 'sharp';
 
 const ImageUploader = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     setSelectedImage(URL.createObjectURL(file));
-    // Perform image conversion, upscaling, or vector conversion here
+
+    // Convert image to webp format
+    const convertedImageBuffer = await sharp(file)
+      .webp()
+      .toBuffer();
+
+    // Do something with the converted image buffer
   };
 
   return (
